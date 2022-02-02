@@ -1,0 +1,9 @@
+LICENSE
+README.md
+pyproject.toml
+setup.cfg
+src/QPE.egg-info/PKG-INFO
+src/QPE.egg-info/SOURCES.txt
+src/QPE.egg-info/dependency_links.txt
+src/QPE.egg-info/requires.txt
+src/QPE.egg-info/top_level.txt

@@ -1,0 +1,27 @@
+Metadata-Version: 2.1
+Name: qpe
+Version: 0.0.2
+Summary: Quantum Phase Estimation in Qiskit
+Home-page: https://github.com/hjaleta/QPE
+Author: Hjalmar Lindstedt, Riccardo Conte, Miguel Carrera Belo
+Author-email: hjaleta@gmail.com
+License: UNKNOWN
+Keywords: quantum-computing,qiskit,quantum-phase-estimation
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Quantum Devz
+Classifier: Topic :: Software Development :: Build Tools
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Requires-Python: >=3
+Description-Content-Type: text/markdown
+License-File: LICENSE.txt
+
+# Quantum Phase Estimation
+
+This library is a framework for quantum phase estimation, a fundamental building block to many quantum algorithms.
+
+
