@@ -1,20 +1,13 @@
-from PhaseEstimator import PhaseEstimator, Iterative, Kitaev, QFT, AQFT
-from src.HelpFunctions import phase_to_exp
+from QPE.PhaseEstimator import PhaseEstimator, Iterative, Kitaev, QFT, AQFT
+from QPE.HelpFunctions import phase_to_exp
 from Unitary import Unitary, Eigenvector
 from typing import List
 import json
 import numpy as np
-from src.Backend import GetBackend, filters
+from QPE.Backend import GetBackend, filters
 from datetime import datetime
 import os
 import re
-
-# How to organise the data?
-#   Estimator
-        # backend_params
-        #     Unitary
-        #         Bits of precision
-        #             Input state 
 
 class ExperimentSet():
 

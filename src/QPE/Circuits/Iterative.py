@@ -1,7 +1,7 @@
 from math import pi
 from qiskit import QuantumCircuit
 import numpy as np
-from Scripts.HelpFunctions import bin_to_float
+from QPE.HelpFunctions import bin_to_float
 
 def IterativeCircuit(U, n_digits, n_round, measurements, states):
 

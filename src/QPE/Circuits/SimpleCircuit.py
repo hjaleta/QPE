@@ -1,7 +1,7 @@
 from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit, circuit, execute
 from qiskit.compiler import transpile, assemble
 from math import pi
-from Scripts.Backend import GetBackend
+from QPE.Backend import GetBackend
 
 def Miguelito():
     circuit = QuantumCircuit(1,1)

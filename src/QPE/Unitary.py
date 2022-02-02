@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.HelpFunctions import float_to_bin, mat_im_to_tuple
+from QPE.HelpFunctions import float_to_bin, mat_im_to_tuple
 from qiskit import *
 
 from qiskit import QuantumCircuit, ClassicalRegister, QuantumRegister

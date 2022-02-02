@@ -1,18 +1,14 @@
 from math import pi
 from qiskit import QuantumCircuit
 import numpy as np
-from Scripts.HelpFunctions import bin_to_float
-from Scripts.Unitary import Unitary
+from QPE.HelpFunctions import bin_to_float
+from QPE.Unitary import Unitary
 
 def SuperIterativeCircuit(U, n_digits, states):
 
     dim = U.dim + 1
     N_states = len(states)
-    # print(dim)
-    # print(n_digits)
-    # print(N_states)
     n_measurents = (2**n_digits - 1) * N_states
-    # print(n_measurents)
     circ = QuantumCircuit(dim, n_measurents)
     target_qubits = list(range(1, dim))
     

@@ -5,14 +5,14 @@ from qiskit import IBMQ, QuantumCircuit, QuantumRegister, transpile, execute
 from qiskit.providers import backend
 from qiskit.providers.jobstatus import JobStatus
 from qiskit.visualization import plot_histogram
-from Scripts.Backend import GetBackend, Login, filters
-from Scripts.Circuits.Iterative import IterativeCircuit
-from Scripts.Circuits.SuperIterative import SuperIterativeCircuit
-from Scripts.Circuits.Kitaev import KitaevCircuit
-from Scripts.Circuits.QFT import QFTCircuit
-from Scripts.Circuits.AQFT import AQFTCircuit
-from Scripts.Unitary import Unitary
-from Scripts.HelpFunctions import bin_to_float, calculate_bitstring_distribution, float_to_bin, get_sub_bitstring_counter, phase_to_exp, count_conversion, mat_im_to_tuple
+from QPE.Backend import GetBackend, Login, filters
+from QPE.Circuits.Iterative import IterativeCircuit
+from QPE.Circuits.SuperIterative import SuperIterativeCircuit
+from QPE.Circuits.Kitaev import KitaevCircuit
+from QPE.Circuits.QFT import QFTCircuit
+from QPE.Circuits.AQFT import AQFTCircuit
+from QPE.Unitary import Unitary
+from QPE.HelpFunctions import bin_to_float, calculate_bitstring_distribution, float_to_bin, get_sub_bitstring_counter, phase_to_exp, count_conversion, mat_im_to_tuple
 import numpy as np
 import time
 from math import pi, sqrt, sin, cos 

@@ -1,7 +1,7 @@
 from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit, circuit
 from qiskit.compiler import transpile, assemble
 from math import pi, sin, cos
-from Scripts.Unitary import Unitary
+from QPE.Unitary import Unitary
 import numpy as np
 
 def KitaevCircuit(U, n_digits, states):
