@@ -1,9 +1,5 @@
 # Quantum Phase Estimation
 
-<p align="left">
-  <img src="readme_images/just_a_phase_doge.jpg" width="350" title="hover text">
-</p>
-
 This library is a framework for quantum phase estimation, a fundamental building block to many quantum algorithms.
 
 ## Authors
