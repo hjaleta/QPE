@@ -27,14 +27,15 @@ def mat_im_to_tuple(M_i):
 
 def mat_tuple_to_im(M_t):
     dim = np.shape(M_t)
+    print(dim)
     M_i = np.zeros(dim).tolist()
-    if len(dim) == 1:
+    if len(dim) == 2:
         for i in range(dim[0]):
-            M_i[i] = im_to_tuple(M_t[i])
-    elif len(dim) == 2:
+            M_i[i] = tuple_to_im(M_t[i])
+    elif len(dim) == 3:
         for i in range(dim[0]):
             for j in range(dim[1]):
-                M_i[i][j] = im_to_tuple(M_t[i][j])
+                M_i[i][j] = tuple_to_im(M_t[i][j])
     else:
         raise ValueError("the imput is not a vector or a matrix")
     return np.array(M_i, dtype=np.complex128)

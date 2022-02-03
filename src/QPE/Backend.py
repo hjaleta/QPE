@@ -5,15 +5,25 @@ from qiskit.providers.ibmq import least_busy
 from quantuminspire.credentials import enable_account as load_QI
 from quantuminspire.qiskit import QI
 
-def Login(service="IBMQ", token_path = "API_tokens.json"):
+def Login(service="IBMQ", token_path = "API_tokens.json", token = ""):
+
+
     if service not in ["IBMQ", "QI"]:
         raise KeyError('Choose service "IBMQ" or "QI"')
 
-    print(service)
+    if token:
+        API_key = token
+    else:
+        try:
+            with open(token_path, "r") as f:
+                token_dict = json.load(f)
+        except:
+            raise FileNotFoundError(f"No json file {token_path} found")
+        try:
+            API_key = token_dict[service]
+        except:
+            raise KeyError(f"No token in {token_path} for service {service}")
 
-    with open(token_path, "r") as f:
-        token_dict = json.load(f)
-    
     if service == "IBMQ":
         try:
             IBMQ.load_account()
@@ -24,14 +34,15 @@ def Login(service="IBMQ", token_path = "API_tokens.json"):
         API_key = token_dict["QI"]
         load_QI(API_key)
         QI.set_authentication()
-        print("HALLA")
 
-
-def GetBackend(service="IBMQ", backend_name = "", flags:list = []):
+def GetBackend(service="IBMQ", backend_name = "", flags:list = [], token_path = "API_tokens.json", token = ""):
 
     if service not in ["IBMQ", "QI", "local"]:
         raise KeyError('Choose service "IBMQ","QI" or "local"')
 
+    if service in ["IBMQ", "QI"]:
+        Login(service, token_path, token)
+    
     sim = lambda x: x.configuration().simulator,
     Q5 = lambda x: x.configuration().n_qubits == 5 and not x.configuration().simulator
 
@@ -40,12 +51,13 @@ def GetBackend(service="IBMQ", backend_name = "", flags:list = []):
         if backend_name == "":
             if "5qubit" in flags:
                 backend = least_busy(provider.backends(
-                    filters= {"5qubit": Q5}
+                    filters= Q5
                     ))
             elif "simulator" in flags:
                 backend = least_busy(provider.backends(
-                    filters= {"simulator": sim}
+                    filters= sim
                     ))
+        else:
             backend = provider.get_backend(backend_name)
     
     elif service == "QI":
@@ -55,7 +67,7 @@ def GetBackend(service="IBMQ", backend_name = "", flags:list = []):
     elif service == "local":
         backend = Aer.get_backend("aer_simulator")
 
-
+    print(service)
     return backend
 
 filters = {

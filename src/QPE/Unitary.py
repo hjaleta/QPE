@@ -1,16 +1,11 @@
 import numpy as np
-
 from QPE.HelpFunctions import float_to_bin, mat_im_to_tuple
-from qiskit import *
-
-from qiskit import QuantumCircuit, ClassicalRegister, QuantumRegister
+from qiskit import QuantumCircuit
 from qiskit.quantum_info.operators import Operator
-from qiskit.circuit import Gate
-
-# use generate random unitaries
 from scipy.stats import unitary_group
-
 from math import pi
+
+# np.array()
 
 class Unitary():
     def __init__(self, operator = [], random = False, random_state=None, dim = 1, name = ""):
