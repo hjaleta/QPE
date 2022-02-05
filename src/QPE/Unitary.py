@@ -1,23 +1,102 @@
+from types import NoneType
 import numpy as np
 from QPE.HelpFunctions import float_to_bin, mat_im_to_tuple
 from qiskit import QuantumCircuit
 from qiskit.quantum_info.operators import Operator
 from scipy.stats import unitary_group
 from math import pi
-
-# np.array()
+from typing import Union, List
 
 class Unitary():
-    def __init__(self, operator = [], random = False, random_state=None, dim = 1, name = ""):
-        self.name = name
+    """
+    Class that represents a unitary operator
+
+    ...
+
+    Attributes
+    ----------
+    operator: qiskit.Operator
+        This object describes the unitary matrix/circuit
+    
+    dim: int
+        The qubit-dimension of the Unitary
+
+    eigen: List[complex]
+        The eigenvalues of the Unitary
+    
+    vectors: List[Eigenvector]
+        The eigenvectors of the Unitary
+    
+    phis: List[float]
+        The eigenphases of the Unitary
+    
+    name: str
+        The name of the Unitary, decided by the user
+    
+    Methods
+    -------
+
+    get_operator(operator, random, random_state,dim)
+        Acquires the appropriate qiskit.Operator object. Either by calculating from input 'operator' or
+        by randomizing
+    
+    gen_random(random_state):
+        returns a random qiskit.Operator object
+    
+    get_dim()
+        Returns the qubit-dimension of the Unitary
+    
+    get_gate(power, ctrl)
+        returns the QuantumCircuit representation of the Unitary. 'power' is the exponent of the Unitary,¨
+        and 'ctrl' is the number of qubits that control the unitary. 
+        'power' = 1 and ctrl = 0 would just return the normal unitary.
+
+    get_eigen()
+        calculates the Eigenvector objects associated with the unitary
+
+    get_vectors:
+        return a list of lists, every list containing coefficients of an eigenvector in the computational basis
+    
+    get_phis:
+        returns the eigenphases of the unitary
+    
+    get_phi_bitstrings(m_digits):
+        Returns a list of bitstrings corresponding to the eigenphases, all rounded to the closest value
+        representable by 'm_digits' bits
+    
+    get_dict(m_digits):
+        Returns a dictionary holding the information about the Unitary
+
+
+    """
+    def __init__(self, operator: Union[QuantumCircuit, Operator, List[list], np.array] = [],
+                random:bool = False, random_state:Union[int, NoneType]=None, 
+                dim:int = 1, name:str = ""):
+        """
+
+        Args:
+            operator: QuantumCircuit, Operator, list or numpy.array
+                The unitary circuit that should be represented. Can be given on many forms
+
+            random: bool
+                If this value is true, a random unitary operator is generated
+            
+            random_state: int or NoneType
+                Fixes the random state seed of the random unitary generation if integer is given.
+        
+            dim: int
+                dimension of the randomized unitary. Defaults to 1.
+            name:
+                Optional name of the unitary. Will be visible if an experiment is exported to json. Defaults to ""
+        """
         self.operator = self.get_operator(operator, random, random_state, dim)
         self.dim = self.get_dim()
         self.eigen = self.get_eigen()
         self.vectors = self.get_vectors()
         self.phis  = self.get_phis()
+        self.name = name
     
     def get_operator(self, operator, random, random_state, dim):
-
         if random == True:
             self.dim = dim
             operator = self.gen_random(random_state)
@@ -48,12 +127,6 @@ class Unitary():
             changed_op = circ_ctr.to_gate(label = lab)
     
         return changed_op
-        
-        # Return gate that can be appended to circuit U^power with ctrl control qubits
-        # ex.
-        # circ.append(U, [0,1,2])
-        # if ctrl = 1 then the control qubit is the fist one
-        # if ctrl = 2 then the control qubits is the fist two
     
     def get_eigen(self):
         # self.operator.data
@@ -68,9 +141,7 @@ class Unitary():
             eigenvectors.append(el)
 
         return eigenvectors
-        # Return a matrix 
-        # Each raw is [eigenvalue, eigenvector[0], eigenvector[1],...eigenvector[2**dim]]
-    
+        
     def get_vectors(self):
         vectors = []
         for e in self.eigen:
@@ -83,24 +154,43 @@ class Unitary():
             phis.append(e.phi)
         return phis
     
-    def get_phi_bitstrings(self, n_digits):
+    def get_phi_bitstrings(self, m_digits):
         b_list = []
         for phi in self.phis:
-            b = float_to_bin(phi, n_digits)
+            b = float_to_bin(phi, m_digits)
             b_list.append(b)
         return b_list
     
-    def get_dict(self, n_digits):
+    def get_dict(self, m_digits):
         d = {}
         d["dimension"] = self.dim
         d["data"] = mat_im_to_tuple(self.operator.data)
         d["eigenvectors"] = mat_im_to_tuple(self.vectors)
         d["phis"] = mat_im_to_tuple(self.phis)
-        d["phi_bitstrings"] = self.get_phi_bitstrings(n_digits)
+        d["phi_bitstrings"] = self.get_phi_bitstrings(m_digits)
         return d
 
 
 class Eigenvector():
+    """
+    This class represents an eigenvector of a Unitary object
+
+    Attributes
+    ----------
+
+    vector: numpy.array
+        A 1D array containing the complex coefficients of the eigenvector
+    
+    value: complex
+        The eigenvalue corresponding to the vector (defined by the Unitary it belongs to)
+    
+    index: int
+        The index of the eigenvector (defined by the Unitary it belongs to)
+
+    phi: float
+        The eigenphase corresponding to the vector (defined by the Unitary it belongs to)
+
+    """
     def __init__(self, vector, value, index):
         self.vector = vector
         self.value = value 
@@ -112,20 +202,13 @@ class Eigenvector():
         if phi < 0:
             phi += 1
         return phi
-        #Return the phase , i.e. a number between 0 and 1
-        # The numpy.angle function could probably be useful
     
-    def get_phi_bitstring(self, n_digits):
-        bitstring = float_to_bin(self.phi, n_digits)
+    def get_phi_bitstring(self, m_digits):
+        bitstring = float_to_bin(self.phi, m_digits)
         return bitstring
 
 
 if __name__ == "__main__":
     u = Unitary(random=True)
-    #print(u.operator.data)
     d = u.get_dict(3)
     print(d)
-    # k = u.eigen[0].get_phi_bitstring(n_digits = 10)
-    # print(k)
-    # phi = u.eigen[0].get_phi()
-    # print(phi)

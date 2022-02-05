@@ -15,7 +15,6 @@ class ExperimentSet():
         self.PE_dicts = self.get_PE_dicts()
         self.generate_filenames()
         self.result_dicts = []
-        # print(self.draw_params)
     
     def get_specs(self, instructions):
         self.path = instructions.pop("path")
@@ -71,7 +70,7 @@ class ExperimentSet():
                         filename += f"_{d['backend_params']['service']}"
                 elif flag == "n_rotations":
                     filename += f"_n_rotations{d['method_specific_params']['n_rotations']}" 
-                elif flag in ["n_digits","n_shots"]:
+                elif flag in ["m_digits","n_shots"]:
                     filename += f"_{flag}{d[flag]}"                   
 
             d["filename"] = filename
@@ -81,15 +80,10 @@ class ExperimentSet():
     def one_run(self, index:int, draw_params = {"T":-1, "NT":-1}):
         PE_dict = self.PE_dicts[index]
         filename = PE_dict.pop("filename")
-        #try:
         estimator = PE_dict.pop("estimator")
         e = estimator(**PE_dict)
         e.run_circuit()
         e.post_process()
-        # except:
-        #     raise RuntimeError("Something went wrong with the PhaseEstimator")
-        
-        # print(self.draw_params)
 
         if (draw_params["T"] != 0) or (draw_params["NT"] != 0):
             plot_path = self.path + f"/plots/{filename}"
@@ -116,94 +110,7 @@ class ExperimentSet():
         
     def run(self):
         for i in range(len(self.PE_dicts)):
-            # try:
             self.one_run(i, self.draw_params)
-            # except:
-            #     print(f"Experiment {self.name} failed for PhaseEstimator described by paramaters {self.PE_dicts[i]}")
-
-
 
 if __name__ == "__main__":
-
-    # estimators = [Kitaev, Iterative]
-    diag_matrix = np.diag(phase_to_exp([0.3, 0.85]))
-    unitaries = [
-        Unitary(random=True, random_state=123, dim = 1),
-        # Unitary(diag_matrix)
-        ]
-    n_digits_list = list(range(2,4))
-    backend_param_list = [
-        {
-            "service": "local"
-        }
-        # ,
-        # {
-        #     "service": "IBMQ", 
-        #     "filters": filters["5qubit"]
-        # }
-    ]
-    state_dicts = [
-        {"N_states": 2},
-        {"eigen_coefs": [
-            [1,1],
-            [3,1]
-        ]}
-    ]
-
-    instructions = {
-    "name": "superexperiment",
-    # "estimator": [Kitaev, Iterative],
-    "estimator":[Iterative],
-    "U": [Unitary(random=True, random_state=123, dim = 1)],
-    "n_digits": list(range(2,4)),
-    "backend_params": [{"service": "local"}],
-    "n_shots": [500],
-    "N_states": [2],
-    "path": "Results/Experiments/superexperiment",
-    "filename_flags": ["estimator", "backend_service", "n_digits"]
-    }
-
-    # path = "Results/Experiments/superexperiment"
-
-    
-    superexperiment = ExperimentSet(instructions)
-    superexperiment.run()
-
-# j = {
-    
-#     "Estimator": "Kitaev",
-#     "Backend":{
-#         "host": "local",
-#         "simulator": True,
-#         "nqubits": 5,
-#         "name": "lima",
-#     },
-
-#     "Unitary": {
-#         "dimension": 1,
-#         "data": [
-#             [(0.3, 0.6)],
-#             []
-#         ],
-#         "eigenvectors":[
-#             [(1,0),(0,0)],
-#             [(1,0.5),(0.1,0.2)]
-#         ],
-#         "phis":[],
-#         "phi_bitstrings": []
-#     },
-
-#     "Bits of precision": 3,
-#     "Input state": [0,0.5,0.5,0],
-    
-#     "estimated phase": {
-#         "phi": 0.3,
-#         "bitstring": "0101",
-#         "distribution": {
-#             "00": 98,
-#             "01": 309,
-#             "10": 20,
-#             "11": 764
-#         }
-#     }
-# }
+    pass

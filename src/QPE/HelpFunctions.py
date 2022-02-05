@@ -27,7 +27,6 @@ def mat_im_to_tuple(M_i):
 
 def mat_tuple_to_im(M_t):
     dim = np.shape(M_t)
-    print(dim)
     M_i = np.zeros(dim).tolist()
     if len(dim) == 2:
         for i in range(dim[0]):
@@ -42,13 +41,13 @@ def mat_tuple_to_im(M_t):
 
 
 
-def float_to_bin(x, n_digits:int):
+def float_to_bin(x, m_digits:int):
     """ 
-    Convert a number x in range [0,1] to a binary string truncated to length n_digits
+    Convert a number x in range [0,1] to a binary string truncated to length m_digits
 
     arguments:
         x: float 
-        n_digits: integer
+        m_digits: integer
     
     return: 
         x_bin: string
@@ -59,13 +58,13 @@ def float_to_bin(x, n_digits:int):
     """
     if x < 0 or x >= 1:
         raise ValueError("x must be in interval [0,1)")
-    x_round = round(x * 2**n_digits)
+    x_round = round(x * 2**m_digits)
     # print(x_round)
-    # print(2**n_digits)
-    if x_round == 2**n_digits:
+    # print(2**m_digits)
+    if x_round == 2**m_digits:
         x_round = 0
     x_raw = bin(x_round)
-    x_bin = x_raw[2:].zfill(n_digits)
+    x_bin = x_raw[2:].zfill(m_digits)
     return x_bin
 
 def bin_to_float(b:Union[str, list]):
@@ -196,41 +195,4 @@ def normalize_counts(counts):
     return norm_count
 
 if __name__ == "__main__":
-    np.set_printoptions(precision=2)
-
-    ones_list = [4,6,2, 34, 32, 9, 27]
-    n_shots = 50
-    b_len = 3
-
-    k = calculate_bitstring_distribution(ones_list, b_len, n_shots)
-
-    j = sum([k[l] for l in k])
-
-    print(k)
-    print(j)
-    # k = np.arange(0,1,0.1)
-    # # print(k)
-    # l = phase_to_exp(k)
-    # print(l)
-    # test_dict = {'0000': 5, "0001": 10, "1101": 100, "1111": 500}
-    # c = get_sub_bitstring_counter(test_dict, 2)
-    # print(c)
-
-    # n = 0.3
-    # l = float_to_bin(n, 8)
-    # print(l)
-    # k = bin_to_float(l)
-    # print(k)
-    
-    # h = "01001100"
-    # print(bin_to_float(h))
-
-
-    # M = np.array([[1+1j,0+0j],[1+1j,2+1j]], dtype=np.complex128)
-    # M = np.zeros(2)
-    # dim = np.shape(M)
-    # print(len(dim))
-    # M_new = mat_im_to_tuple(M)
-    # print(M_new)
-    # M_2 = mat_tuple_to_im(M_new)
-    # print(M_2)
+    pass

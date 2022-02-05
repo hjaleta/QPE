@@ -13,12 +13,10 @@ def unpack_PE_from_json(path):
     estimator = d["Estimator"]
     
     tuple_matrix = d["Unitary"]["data"]
-    print(tuple_matrix)
-    print(type(tuple_matrix))
     im_matrix = mat_tuple_to_im(tuple_matrix)
     U = Unitary(im_matrix)
 
-    n_digits = d["Bits of precision"]
+    m_digits = d["Bits of precision"]
     input_states = [mat_tuple_to_im(d["Input state"])]
     n_shots = d["shots"]
     backend_params = {"service": d["Backend"]["service"]}
@@ -33,7 +31,7 @@ def unpack_PE_from_json(path):
         PE = Kitaev
     elif estimator == "Iterative":
         PE = Iterative
-    PE_object = PE(U, n_digits, n_shots=n_shots,
+    PE_object = PE(U, m_digits, n_shots=n_shots,
             backend_params=backend_params, input_states=input_states,
             method_specific_params=method_specific_params, re_initialize=re_initialize)
     

@@ -3,7 +3,7 @@ import sys
 sys.path.insert(0,os.getcwd())
 from qiskit import IBMQ, QuantumCircuit, transpile, execute
 from qiskit.providers.jobstatus import JobStatus
-from QPE.Backend import GetBackend, Login
+from QPE.Backend import get_backend, Login
 from QPE.Unitary import Unitary
 from QPE.HelpFunctions import mat_im_to_tuple, mat_tuple_to_im
 import numpy as np
@@ -15,71 +15,167 @@ import json
 class PhaseEstimator():
 
     """
-    Superclass to algorithms for Quantum Phase Estimation
+    Superclass for QPE Algorithms
 
-    Only one of the arguments 'N_states', 'input_states' or 'eigen_coefs' is needed
+    ...
 
-    Parameters
+    Attributes
     ----------
+    
     U: Unitary
-        The unitary to perform phase estimation on
+        The Unitary object that we perform phase estimation on. 
     
-    n_digits: int
-        The number of bits of precision the algorithm should use
-    
-    N_states: int
-        The number of eigenstates to estimate the phase of. If parameter is set to -1, all states are estimated
-    
-    input_states: List[list]
-        The input states that is initialized and estimated, in the computational basis. Each sublist should contain the complex coefficients that describe the desired statevector.
-    
-    eigen_coefs: List[list]
-        The input states that is initialized and estimated, but in the eigenvector basis of the unitary. Each sublist should contain the complex coefficients that describe the desired statevector in the computational basis.
-
-    n_shots: int
-        Number of shots that we run the associated QuantumCircuit
-
-    backend_params: dict
-        Dictionary with kwargs to define the backend. See GetBackend in module QPE.Backend for description of these kwargs
+    m_digits: int
+        The number of digits of precision
     
     method_specific_params: dict
-        Dictionary which hold parameters that are not common for all algorithms
-
+        A dictionary containing parameters which are specific for a particular method. It is here for consistency
+    
     re_initialize: bool
-        Parameter that decides whether the eigenstate should be re-inintialized between different trials or not
+        Boolean which defines whether a state should be re-initialised or not between the different partitions of the
+        QuantumCircuits
+    
+    states: List[List[complex]]
+        A list of lists, where every sublist describes the input state in the computational basis.
+        Calculated from N_states, input_states or eigen_coefs
+    
+    state_type: str
+        String which indicates the type of the initialized state
+    
+    N_states: int
+        The number of different states we perform phase estimation on
+    
+    n_shots: int
+        The number of shots used for each QuantumCircuit
+    
+    backend_params: dict
+        Dictionary containing the keyword arguments used to obtain self.backend
+
+    backend: *qiskit backend object*
+        The backend object used for the experiments. Type varies depending on the backend.
+
+    circuits: List[QuantumCircuit]
+        The associated QuantumCircuits of the algorithm
+    
+    transpiled_circuits: List[QuantumCircuit]
+        The transpiled version of self.circuits (with respect to the used backend)
+    
+    circuit_depths: List[int]
+        The depths of the QuantumCircuits in self.circuits
+    
+    transpiled_circuit_depths: List[int]
+        The depths of the QuantumCircuits in self.transpiled_circuits
+    
+    jobs: List[*qiskit job object*]
+        List of the jobs that has been run on the backend. Type varies depending on the backend.
+    
+    estimated_phases: List[float]
+        The estimated phases corresponding to the input states in self.states
+    
+    estimated_bits: List[str]
+        The estimated binary bitstrings corresponding to the input states in self.states
+        
+    bitstring_distributions: List[dict]
+        The distribution of bitstrings found in the algorithm
+    
+    estimator_flag: str
+        A string indicating which algorithm is used. Empty for this superclass
 
     Methods
     --------
 
-    get_input_states:
-        input: N_states, input_states, eigen_coefs
-        output: A list of lists. Every sublist describes a state vector in the computational basis.
+    get_input_states(N_states, input_states, eigen_coefs)
+        Calculates the input state we estimate the eigenphase of
     
-    get_backend:
-        inp
+    get_backend()
+        Acquires the backend used in the experiments
+    
+    get_circuits()
+        Acquires the associated QuantumCircuit for the experiment
+    
+    get_transpiled_circuits()
+        Returns the associated transpiled QuantumCircuit for the experiment (with respect to the backend we use)
+    
+    run_circuit(index=-1)
+        Sends one of the transpiled circuits to the backend and executes it. Also appends the corresponding
+        qiskit job object to self.job_objects
+    
+    post_process()
+        Performs the necessary post processing to the results found from running the circuits
 
+    get_depths()
+        Calculate the depths of the circuits in self.circuits and self.transpiled_circuits
+    
+    get_status()
+        Checks the status of the last job that was sent to the backend.
+    
+    wait_for_job()
+        Pauses execution until the last job that was sent is finished
+    
+    print_status()
+        Prints the current status of the last job
+    
+    draw_circuits(path:str = "", N_non_transpiled:int = 1, N_transpiled:int = 0, show = False):
+        Draws an image / images the QuantumCircuits involved in the experiment
+    
+    get_dicts():
+        Returns a list of dictionaries which contain information about the experiment. One dictionary for each
+        examined input state
+    
+    get_backend_dict():
+        Returns a dictionary with information of the Unitary
 
-    Attributes
-    ----------
-    U
-    n_digits
-    method_specific params    
-    re_initialise
+    def get_phase_dict(i):
+        Returns a dictionary with information about the estimated phase of the i:th input state
 
-    states:
-        A list of lists, where every sublist describes the input state in the computational basis.
-        This 
-
-
-
+    def get_bitstrings(self):
+        Returns a list of the estimated bitstrings corresponding to each input state
+    
+    def get_bitstring_distribution(self, i):
+        Returns the bitstring distribution for the i:th input state
+    
+    def dump_to_json(self, path):
+        Saves the data of the experiment to the given path
     """
 
-
-    def __init__(self, U:Unitary, n_digits:int, N_states:int = -1, input_states: List[list] = [[]], 
+    def __init__(self, U:Unitary, m_digits:int, N_states:int = -1, input_states: List[list] = [[]], 
                 eigen_coefs: List[list] = [[]], n_shots:int = 1024, backend_params: dict = {"service":"local"}, 
-                method_specific_params ={}, re_initialize:bool = True,):
+                method_specific_params ={}, re_initialize:bool = True):
+        """
+        Note that only one of the parameters N_states, input_states and eigen_coefs has to be given.
+
+        Parameters
+        ----------
+        U: Unitary
+            The unitary to perform phase estimation on
+
+        m_digits: int
+            The number of bits of precision the algorithm should use
+
+        N_states: int
+            The number of eigenstates to estimate the phase of. If parameter is set to -1, all states are estimated
+
+        input_states: List[list]
+            The input states that is initialized and estimated, in the computational basis. Each sublist should contain the complex coefficients that describe the desired statevector.
+
+        eigen_coefs: List[list]
+            The input states that is initialized and estimated, but in the eigenvector basis of the unitary. Each sublist should contain the complex coefficients that describe the desired statevector in the computational basis.
+
+        n_shots: int
+            Number of shots that we run the associated QuantumCircuit
+
+        backend_params: dict
+            Dictionary with kwargs to define the backend. See GetBackend in module QPE.Backend for description of these kwargs
+
+        method_specific_params: dict
+            Dictionary which hold parameters that are not common for all algorithms
+
+        re_initialize: bool
+            Parameter that decides whether the eigenstate should be re-inintialized between different trials or not
+        """
+
         self.U = U
-        self.n_digits = n_digits
+        self.m_digits = m_digits
         self.method_specific_params = method_specific_params
         self.re_initialize = re_initialize
         self.states, self.state_type, self.N_states = self.get_input_states(N_states, input_states, eigen_coefs)
@@ -88,15 +184,12 @@ class PhaseEstimator():
         self.backend = self.get_backend()
         self.circuits = self.get_circuits()
         self.transpiled_circuits = self.get_transpiled_circuits()
+        self.circuit_depths, self.transpiled_circuit_depths = self.get_depths()
         self.jobs = []
-        self.job_results = []
-        self.counts = []
         self.estimated_phases = []
         self.estimated_bits = []
-        self.circuit_depths, self.transpiled_circuit_depths = [], []
         self.bitstring_distributions = []
         self.estimator_flag = ""
-
 
     def get_input_states(self, N_states, input_states, eigen_coefs):
         s = []
@@ -134,7 +227,7 @@ class PhaseEstimator():
         return s, state_type, len(s)
 
     def get_backend(self):
-        backend = GetBackend(**self.backend_params)
+        backend = get_backend(**self.backend_params)
         return backend
 
     def get_circuits(self):
@@ -153,8 +246,6 @@ class PhaseEstimator():
         )
         self.jobs.append(job)
         self.wait_for_job()
-        result = self.jobs[-1].result()
-        self.job_results.append(result)
 
     def post_process(self):
         pass
@@ -188,7 +279,6 @@ class PhaseEstimator():
                 return "V"
 
     def wait_for_job(self, n_round = 0):
-        # print("HALLAAA")
         start_time = time.time()
         max_minutes = 30
         status_print_period_minutes = 3
@@ -208,14 +298,11 @@ class PhaseEstimator():
                 current_time = time.time()
                 if current_time - start_time > 60*max_minutes:
                     raise RuntimeError(f"Script has been waiting for {max_minutes} minutes\nExecution terminated")
-                # print(new_status)
                 if current_time - print_time > 60*status_print_period_minutes:
                     self.print_status(new_status)
                     print_time = current_time
-
                 if new_status != old_status:
                     self.print_status(new_status)
-                    
                     if new_status[0] == "D":
                         waiting = False
 
@@ -261,7 +348,7 @@ class PhaseEstimator():
 
     def get_dicts(self):
         dicts = []
-        u_dict = self.U.get_dict(self.n_digits)
+        u_dict = self.U.get_dict(self.m_digits)
         backend_dict = self.get_backend_dict()
         for i in range(self.N_states):
             input_state = mat_im_to_tuple(self.states[i])
@@ -270,7 +357,7 @@ class PhaseEstimator():
                 "Estimator": self.estimator_flag,
                 "Backend": backend_dict,
                 "Unitary": u_dict,
-                "Bits of precision": self.n_digits,
+                "Bits of precision": self.m_digits,
                 "Input state": input_state,
                 "estimated phase": phase_dict,
                 "shots": self.n_shots,
@@ -302,7 +389,6 @@ class PhaseEstimator():
         return d
 
     def get_bitstrings(self):
-        # Return a list of the estimated bitstring orresponding to each state
         bitstrings = []
         if self.estimator_flag in ["Kitaev", "Iterative"]:
             for i in range(len(self.states)):

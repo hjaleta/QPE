@@ -1,12 +1,33 @@
 import json
-from typing import Set
 from qiskit import IBMQ, Aer
 from qiskit.providers.ibmq import least_busy
+from qiskit.providers.aer import AerSimulator
+from qiskit.test.mock import FakeTokyo
 from quantuminspire.credentials import enable_account as load_QI
 from quantuminspire.qiskit import QI
 
 def Login(service="IBMQ", token_path = "API_tokens.json", token = ""):
+    """
+    Logs the user into the desired backend provider
 
+    Parameters
+    ---------
+        service (str, optional): 
+            The service to be used for the backend. Defaults to "IBMQ". Possible other choice is 'QI' (QuantumInspire)
+        token_path (str, optional): 
+            Filepath to a json-file where the API tokens are stored. Defaults to "API_tokens.json".
+        token (str, optional): 
+            An API-token. Use if you dont have the token file. Must correspond to the chosen service. Defaults to ""
+
+    Raises
+    ------
+        KeyError: 
+            If using an unsupported/non-existing service
+        FileNotFoundError: 
+            If file with tokens can't be found
+        KeyError: 
+            If token file is found, but does not contain the right API_tokens
+    """
 
     if service not in ["IBMQ", "QI"]:
         raise KeyError('Choose service "IBMQ" or "QI"')
@@ -35,7 +56,32 @@ def Login(service="IBMQ", token_path = "API_tokens.json", token = ""):
         load_QI(API_key)
         QI.set_authentication()
 
-def GetBackend(service="IBMQ", backend_name = "", flags:list = [], token_path = "API_tokens.json", token = ""):
+def get_backend(service="IBMQ", backend_name = "", flags:list = [], token_path = "API_tokens.json", token = ""):
+    """A function that acquires a backend object based upon the given parameters.
+
+    Parameters
+    ---------
+        service (str, optional): 
+            The service which the backend  Defaults to "IBMQ".
+        backend_name (str, optional): 
+            The name of the desired backend. Defaults to "".
+        flags (List[str], optional):
+            The string are flags that one can use to filter backends. Defaults to [].
+        token_path (str, optional):
+            A directory where API_tokens are stored. Defaults to "API_tokens.json".
+        token (str, optional):
+            An API_token corresponding to the used 'service'. Defaults to "".
+
+    Raises
+    ------
+        KeyError: 
+            If using an unsupported/non-existing service
+
+    Returns
+    -------
+        backend: 
+            A backend which can be used within qiskit's framework
+    """
 
     if service not in ["IBMQ", "QI", "local"]:
         raise KeyError('Choose service "IBMQ","QI" or "local"')
@@ -67,7 +113,6 @@ def GetBackend(service="IBMQ", backend_name = "", flags:list = [], token_path = 
     elif service == "local":
         backend = Aer.get_backend("aer_simulator")
 
-    print(service)
     return backend
 
 filters = {
@@ -79,5 +124,5 @@ filters = {
 if __name__ == "__main__":
     Login("IBMQ")
     #print(IBMQ.providers())
-    backend = GetBackend("IBMQ")
+    backend = get_backend("IBMQ")
     
